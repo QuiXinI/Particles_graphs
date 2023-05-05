@@ -1,5 +1,6 @@
-import turtle
 import math
+import time
+import turtle
 
 
 # заполнялка отсутупов
@@ -22,7 +23,7 @@ filler()
 q = float(input('Заряд частицы (с учётом знака, МикроКулонах): '))
 m = float(input('Масса частицы (в Атомарных Единицах Массы): '))
 v = float(input('Скорость частицы (в Метрах в Секунду): '))
-angle = float(input('Угол вхождения частицы в поле (в Градусах)'))
+angle = float(input('Угол вхождения частицы в поле (в Градусах): '))
 B = float(input('Индукция магнитного поля (в Теслах): '))
 E = float(input('Сила электрического поля (в Ньютонах на Кулон): '))
 dt = float(input('Временной шаг (в СантиСекундах): ')) / 100
@@ -43,6 +44,8 @@ canvas.setworldcoordinates(-1.5 / mashtab, -1.5 / mashtab, 1.5 / mashtab, 1.5 / 
 canvas.delay(0)
 particle = turtle.Turtle()
 particle.penup()
+particle.hideturtle()
+particle.speed(1)
 
 # обозначение направления магнитного поля
 if direct == 0:
@@ -117,13 +120,16 @@ while abs(particle.pos()) < 15:
     # сместить частицу
     particle.goto(x, y)
 
+    # мини задержка, для просмотра в реальном времени
+    time.sleep(0.01)
+
 # Вывод финальных координат
 particle.pensize(10)
 particle.color("Blue")
-particle.goto(x+0.01, y)
+particle.goto(x + 0.01, y)
 particle.penup()
-particle.goto(-1, 1)
-particle.write(f"({x}, {y})")
+particle.goto(-1 / mashtab, 1 / mashtab)
+particle.write(f"Финальные координаты: ({x}, {y})")
 
 # закрытие окна
 canvas.exitonclick()
