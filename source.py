@@ -34,8 +34,8 @@ filler()
 # константы
 x = 0  # стартовая позиция
 y = 0
-vx = v * math.cos(math.radians(angle))  # стартовая скорость
-vy = v * math.sin(math.radians(angle))
+vx = v * math.cos(math.radians(angle))  # стартовая скорость по x
+vy = v * math.sin(math.radians(angle))  # стартовая скорость по y
 
 # окно черепахи и сама черепаха
 canvas = turtle.Screen()
