@@ -129,7 +129,9 @@ particle.color("Blue")
 particle.goto(x + 0.01, y)
 particle.penup()
 particle.goto(-1 / mashtab, 1 / mashtab)
-particle.write(f"Финальные координаты: ({x}, {y})")
+particle.write(f"Финальные координаты: ({round(x*100)/100}, {round(y*100)/100})")
+filler()
+print(f"Финальные координаты: ({round(x*100)/100}, {round(y*100)/100})")
 
 # закрытие окна
 canvas.exitonclick()
