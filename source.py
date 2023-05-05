@@ -88,11 +88,11 @@ particle.goto(0, 0)
 particle.pensize(1)
 particle.write("(0, 0)")
 
-# debug
-debug = 0
+# отсчёт времени
+timer = 0
 
 # цикл симуляции
-while abs(particle.pos()) < 15:
+while abs(particle.pos()) < 150:
     # силы
     fx = q * (E + vy * B)
     fy = q * (vx * B)
@@ -114,8 +114,8 @@ while abs(particle.pos()) < 15:
         y -= vy * dt
 
     # внтуреннее время модели
-    print(f'Смоделировано: {debug * dt} секунд')
-    debug += 1
+    print(f'Смоделировано: {timer * dt} секунд')
+    timer += 1
 
     # сместить частицу
     particle.goto(x, y)
