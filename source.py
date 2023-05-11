@@ -1,6 +1,6 @@
 import math
-import time
-import turtle
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 # заполнялка отсутупов
@@ -12,126 +12,54 @@ def filler():
     print()
 
 
+def calculate_trajectory(q, m, E, B, v0, t):
+
+    x0, y0 = 0.0, 0.0  # начальные координаты
+    vx0, vy0 = v0  # начальные скорости по осям
+
+    # Расчет ускорений
+    ax = (q / m) * (E[0] + v0[0] * B[0])
+    ay = (q / m) * (E[1] + v0[1] * B[1])
+
+    # Расчет координат в зависимости от времени
+    x = x0 + vx0 * t + 0.5 * ax * t**2
+    y = y0 + vy0 * t + 0.5 * ay * t**2
+
+    return x, y
+
+
 # предупреждение
-print('Не рекомендуется вводить очень маленькие (<0.001) и очень большие (>1000) данные, из-за проблем с '
-      'производительностью python в вычислениях больших значений')
+print("Не рекомендуется вводить очень маленькие (<0.001) и очень большие (>1000) данные, из-за проблем с "
+      "производительностью python в вычислениях больших значений")
 filler()
-_ = input('С предупреждением ознакомлен, несу ответственность за своё железо (ввести любой символ): ')
+_ = input("С предупреждением ознакомлен, несу ответственность за своё железо (ввести любой символ): ")
 filler()
 
 # параметры на ввод
-q = float(input('Заряд частицы (с учётом знака, МикроКулонах): '))
-m = float(input('Масса частицы (в Атомарных Единицах Массы): '))
-v = float(input('Скорость частицы (в Метрах в Секунду): '))
-angle = float(input('Угол вхождения частицы в поле (в Градусах): '))
-B = float(input('Индукция магнитного поля (в Теслах): '))
-E = float(input('Сила электрического поля (в Ньютонах на Кулон): '))
-dt = float(input('Временной шаг (в СантиСекундах): ')) / 100
-direct = int(input('Направление поля (1 на наблюдателя, 0 от наблюдателя): '))
-mashtab = float(input('Введите степень приближения/отдаления (значение больше/меньше 1) поля: '))
+q = float(input("Заряд частицы (с учётом знака, Кулонах): "))
+m = float(input("Масса частицы (в Килограммах): "))
+v = float(input("Скорость частицы (в Метрах в Секунду): "))
+v_angle = float(input("Угол вхождения частицы в поле: "))
+B = float(input("Индукция магнитного поля (в Теслах): "))
+B_angle = float(input("Угол вектора магнитной индукции (в Градусах): "))
+E = float(input("Сила электрического поля (в Ньютонах на Кулон): "))
+E_angle = float(input("Угол силы электрического поля (в Градусах): "))
+time_lim = float(input("Лимит времени симуляции (в Секундах): "))
 
+# пересчёт значений в векторные, для удобства хранения
+E = np.array([E*math.cos(math.radians(E_angle)), E*math.sin(math.radians(E_angle))])  #[Ex, Ey]
+B = np.array([B*math.cos(math.radians(B_angle)), B*math.sin(math.radians(B_angle))])  # [Bx, By]
+v0 = np.array([v*math.cos(math.radians(v_angle)), v*math.sin(math.radians(v_angle))])  # начальная скорость [v0x, v0y]
 filler()
 
-# константы
-x = 0  # стартовая позиция
-y = 0
-vx = v * math.cos(math.radians(angle))  # стартовая скорость по x
-vy = v * math.sin(math.radians(angle))  # стартовая скорость по y
+t = np.linspace(0, time_lim, 100)  # шаги времени, как массив
 
-# окно черепахи и сама черепаха
-canvas = turtle.Screen()
-canvas.setworldcoordinates(-1.5 / mashtab, -1.5 / mashtab, 1.5 / mashtab, 1.5 / mashtab)
-canvas.delay(0)
-particle = turtle.Turtle()
-particle.penup()
-particle.hideturtle()
-particle.speed(1)
+x, y = calculate_trajectory(q, m, E, B, v0, t)
 
-# обозначение направления магнитного поля
-if direct == 0:
-    particle.pensize(3)
-    particle.goto(-1.2 / mashtab, -1.2 / mashtab)
-    particle.pendown()
-    particle.goto(-1.5 / mashtab, -1.5 / mashtab)
-    particle.penup()
-    particle.goto(-1.5 / mashtab, -1.2 / mashtab)
-    particle.pendown()
-    particle.goto(-1.2 / mashtab, -1.5 / mashtab)
-    particle.penup()
-    particle.goto(-1.2 / mashtab, 1.2 / mashtab)
-    particle.pendown()
-    particle.goto(-1.5 / mashtab, 1.5 / mashtab)
-    particle.penup()
-    particle.goto(-1.5 / mashtab, 1.2 / mashtab)
-    particle.pendown()
-    particle.goto(-1.2 / mashtab, 1.5 / mashtab)
-else:
-    particle.pensize(10)
-    particle.goto(-1.19 / mashtab, -1.19 / mashtab)
-    particle.pendown()
-    particle.goto(-1.21 / mashtab, -1.19 / mashtab)
-    particle.goto(-1.21 / mashtab, -1.21 / mashtab)
-    particle.goto(-1.19 / mashtab, -1.21 / mashtab)
-    particle.goto(-1.19 / mashtab, -1.19 / mashtab)
-    particle.penup()
-    particle.goto(-1.19 / mashtab, 1.19 / mashtab)
-    particle.pendown()
-    particle.goto(-1.21 / mashtab, 1.19 / mashtab)
-    particle.goto(-1.21 / mashtab, 1.21 / mashtab)
-    particle.goto(-1.19 / mashtab, 1.21 / mashtab)
-    particle.goto(-1.19 / mashtab, 1.19 / mashtab)
-particle.pensize(10)
-particle.penup()
-particle.goto(-0.0001, 0)
-particle.pendown()
-particle.goto(0, 0)
-particle.pensize(1)
-particle.write("(0, 0)")
-
-# отсчёт времени
-timer = 0
-
-# цикл симуляции
-while abs(particle.pos()) < 150:
-    # силы
-    fx = q * (E + vy * B)
-    fy = q * (vx * B)
-
-    # ускорения
-    ax = fx / m
-    ay = fy / m
-
-    # обновление скоростей
-    vx += ax * dt
-    vy += ay * dt
-
-    # обновление позиции
-    if direct == 0:
-        x += vx * dt
-        y += vy * dt
-    else:
-        x += vx * dt
-        y -= vy * dt
-
-    # внтуреннее время модели
-    print(f'Смоделировано: {timer * dt} секунд')
-    timer += 1
-
-    # сместить частицу
-    particle.goto(x, y)
-
-    # мини задержка, для просмотра в реальном времени
-    time.sleep(0.01)
-
-# Вывод финальных координат
-particle.pensize(10)
-particle.color("Blue")
-particle.goto(x + 0.01, y)
-particle.penup()
-particle.goto(-1 / mashtab, 1 / mashtab)
-particle.write(f"Финальные координаты: ({round(x*100)/100}, {round(y*100)/100})")
-filler()
-print(f"Финальные координаты: ({round(x*100)/100}, {round(y*100)/100})")
-
-# закрытие окна
-canvas.exitonclick()
+# построение графика
+plt.plot(x, y)
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('Траектория движения заряженной частицы')
+plt.grid(True)
+plt.show()
