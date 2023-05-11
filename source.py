@@ -1,9 +1,8 @@
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 
 
-# заполнялка отсутупов
+# заполнялка отступов
 def filler():
     print()
     print()
@@ -12,20 +11,19 @@ def filler():
     print()
 
 
-def calculate_trajectory(q, m, E, B, v0, t):
-
+def calculate_trajectory(q_ct, m_ct, e_ct, b_ct, v0_ct, t_ct):
     x0, y0 = 0.0, 0.0  # начальные координаты
-    vx0, vy0 = v0  # начальные скорости по осям
+    vx0, vy0 = v0_ct  # начальные скорости по осям
 
     # Расчет ускорений
-    ax = (q / m) * (E[0] + v0[0] * B[0])
-    ay = (q / m) * (E[1] + v0[1] * B[1])
+    ax = (q_ct / m_ct) * (e_ct[0] + v0_ct[0] * b_ct[0])
+    ay = (q_ct / m_ct) * (e_ct[1] + v0_ct[1] * b_ct[1])
 
     # Расчет координат в зависимости от времени
-    x = x0 + vx0 * t + 0.5 * ax * t**2
-    y = y0 + vy0 * t + 0.5 * ay * t**2
+    x_ct = x0 + vx0 * t_ct + 0.5 * ax * t_ct ** 2
+    y_ct = y0 + vy0 * t_ct + 0.5 * ay * t_ct ** 2
 
-    return x, y
+    return x_ct, y_ct
 
 
 # предупреждение
@@ -40,21 +38,21 @@ q = float(input("Заряд частицы (с учётом знака, Куло
 m = float(input("Масса частицы (в Килограммах): "))
 v = float(input("Скорость частицы (в Метрах в Секунду): "))
 v_angle = float(input("Угол вхождения частицы в поле: "))
-B = float(input("Индукция магнитного поля (в Теслах): "))
+b = float(input("Индукция магнитного поля (в Теслах): "))
 B_angle = float(input("Угол вектора магнитной индукции (в Градусах): "))
-E = float(input("Сила электрического поля (в Ньютонах на Кулон): "))
+e = float(input("Сила электрического поля (в Ньютонах на Кулон): "))
 E_angle = float(input("Угол силы электрического поля (в Градусах): "))
 time_lim = float(input("Лимит времени симуляции (в Секундах): "))
 
 # пересчёт значений в векторные, для удобства хранения
-E = np.array([E*math.cos(math.radians(E_angle)), E*math.sin(math.radians(E_angle))])  #[Ex, Ey]
-B = np.array([B*math.cos(math.radians(B_angle)), B*math.sin(math.radians(B_angle))])  # [Bx, By]
-v0 = np.array([v*math.cos(math.radians(v_angle)), v*math.sin(math.radians(v_angle))])  # начальная скорость [v0x, v0y]
+e = np.array([e * np.cos(np.deg2rad(E_angle)), e * np.sin(np.deg2rad(E_angle))])  # [Ex, Ey]
+b = np.array([b * np.cos(np.deg2rad(B_angle)), b * np.sin(np.deg2rad(B_angle))])  # [Bx, By]
+v0 = np.array([v * np.cos(np.deg2rad(v_angle)), v * np.sin(np.deg2rad(v_angle))])  # начальная скорость [v0x, v0y]
 filler()
 
 t = np.linspace(0, time_lim, 100)  # шаги времени, как массив
 
-x, y = calculate_trajectory(q, m, E, B, v0, t)
+x, y = calculate_trajectory(q, m, e, b, v0, t)
 
 # построение графика
 plt.plot(x, y)
