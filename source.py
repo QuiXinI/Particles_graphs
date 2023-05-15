@@ -1,3 +1,4 @@
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -11,19 +12,36 @@ def filler():
     print()
 
 
-def calculate_trajectory(q_ct, m_ct, e_ct, b_ct, v0_ct, t_ct):
-    x0, y0 = 0.0, 0.0  # начальные координаты
-    vx0, vy0 = v0_ct  # начальные скорости по осям
+def check(vx, vy):
+    if vy == 0:
+        return 1
+    else:
+        return math.degrees(math.atan2(vy, vx))
 
-    # Расчет ускорений
-    ax = (q_ct / m_ct) * (e_ct[0] + v0_ct[0] * b_ct[0])
-    ay = (q_ct / m_ct) * (e_ct[1] + v0_ct[1] * b_ct[1])
 
-    # Расчет координат в зависимости от времени
-    x_ct = x0 + vx0 * t_ct + 0.5 * ax * t_ct ** 2
-    y_ct = y0 + vy0 * t_ct + 0.5 * ay * t_ct ** 2
+def calculate_trajectory(q, m, e, e_angle, b, b_angle, v, v_angle, time_step, x, y):
+    # Вычисление компонент электрического и магнитного полей
+    e_x = e * math.cos(math.radians(e_angle))
+    e_y = e * math.sin(math.radians(e_angle))
+    b_x = b * math.cos(math.radians(b_angle))
+    b_y = b * math.sin(math.radians(b_angle))
 
-    return x_ct, y_ct
+    # Вычисление компонент ускорения
+    a_x = (q * (e_x + v * b_y - v * e_y)) / m
+    a_y = (q * (e_y - v * b_x + v * e_x)) / m
+
+    # Вычисление новых компонент скорости
+    v_x = v * math.cos(math.radians(v_angle)) + a_x * time_step
+    v_y = v * math.sin(math.radians(v_angle)) + a_y * time_step
+
+    # Вычисление новых компонент позиции
+    x += v_x * time_step
+    y += v_y * time_step
+
+    # Вычисление нового угла
+    v_angle = check(v_x, v_y)
+
+    return [x, y, v_angle]
 
 
 # предупреждение
@@ -34,25 +52,28 @@ _ = input("С предупреждением ознакомлен, несу от
 filler()
 
 # параметры на ввод
-q = float(input("Заряд частицы (с учётом знака, Кулонах): "))
-m = float(input("Масса частицы (в Килограммах): "))
+q = float(input("Заряд частицы (с учётом знака, в элементарных зарядах): ")) / 6.242e+18
+m = float(input("Масса частицы (в Атомарных Единицах Массы): ")) / 6.022e+26
 v = float(input("Скорость частицы (в Метрах в Секунду): "))
 v_angle = float(input("Угол вхождения частицы в поле: "))
 b = float(input("Индукция магнитного поля (в Теслах): "))
-B_angle = float(input("Угол вектора магнитной индукции (в Градусах): "))
-e = float(input("Сила электрического поля (в Ньютонах на Кулон): "))
-E_angle = float(input("Угол силы электрического поля (в Градусах): "))
+b_angle = float(input("Угол вектора магнитной индукции (в Градусах): "))
+e = float(input("Сила электрического поля (в Ньютонах на Метр): "))
+e_angle = float(input("Угол силы электрического поля (в Градусах): "))
 time_lim = float(input("Лимит времени симуляции (в Секундах): "))
+time_step = float(input("Шаг времени симуляции (в Миллисекундах): ")) / 1000
 
-# пересчёт значений в векторные, для удобства хранения
-e = np.array([e * np.cos(np.deg2rad(E_angle)), e * np.sin(np.deg2rad(E_angle))])  # [Ex, Ey]
-b = np.array([b * np.cos(np.deg2rad(B_angle)), b * np.sin(np.deg2rad(B_angle))])  # [Bx, By]
-v0 = np.array([v * np.cos(np.deg2rad(v_angle)), v * np.sin(np.deg2rad(v_angle))])  # начальная скорость [v0x, v0y]
-filler()
+# заполнение массивов симуляции
+x = [0] * int(time_lim // time_step + 1)
+y = x
+for i in range(1, len(x)):
+    x[i] = calculate_trajectory(q, m, e, e_angle, b, b_angle, v, v_angle, time_step, x[i - 1], y[i - 1],)[0]
+    y[i] = calculate_trajectory(q, m, e, e_angle, b, b_angle, v, v_angle, time_step, x[i - 1], y[i - 1],)[1]
+    v_angle = calculate_trajectory(q, m, e, e_angle, b, b_angle, v, v_angle, time_step, x[i - 1], y[i - 1],)[2]
 
-t = np.linspace(0, time_lim, 100)  # шаги времени, как массив
-
-x, y = calculate_trajectory(q, m, e, b, v0, t)
+# перевод массивов в необходимый для библиотеки тип данных
+x = np.asarray(x)
+y = np.asarray(y)
 
 # построение графика
 plt.plot(x, y)
