@@ -16,25 +16,25 @@ def check(vx, vy):
     if vy == 0:
         return 1
     else:
-        return math.degrees(math.atan2(vy, vx))
+        return math.degrees(math.atan(vx/vy))
 
 
-def calculate_trajectory(q, m, e, e_angle, b, b_angle, v, v_angle, time_step, x, y):
-    # Вычисление компонент электрического и магнитного полей
+def calculate_trajectory(q, m, e, e_angle, b, v, v_angle, time_step, x, y):
+    # Вычисление векторных единиц
     e_x = e * math.cos(math.radians(e_angle))
     e_y = e * math.sin(math.radians(e_angle))
-    b_x = b * math.cos(math.radians(b_angle))
-    b_y = b * math.sin(math.radians(b_angle))
+    v_x = v * math.cos(math.radians(v_angle))
+    v_y = v * math.sin(math.radians(v_angle))
 
     # Вычисление компонент ускорения
-    a_x = (q * (e_x + v * b_y - v * e_y)) / m
-    a_y = (q * (e_y - v * b_x + v * e_x)) / m
+    a_x = (q * (e_x + v_x * b)) / m
+    a_y = (q * (e_y + v_y * b)) / m
 
-    # Вычисление новых компонент скорости
-    v_x = v * math.cos(math.radians(v_angle)) + a_x * time_step
-    v_y = v * math.sin(math.radians(v_angle)) + a_y * time_step
+    # Вычисление новых скоростей
+    v_x = v_x + a_x * time_step
+    v_y = v_y + a_y * time_step
 
-    # Вычисление новых компонент позиции
+    # Вычисление новых координат
     x += v_x * time_step
     y += v_y * time_step
 
@@ -57,19 +57,21 @@ m = float(input("Масса частицы (в Атомарных Единица
 v = float(input("Скорость частицы (в Метрах в Секунду): "))
 v_angle = float(input("Угол вхождения частицы в поле: "))
 b = float(input("Индукция магнитного поля (в Теслах): "))
-b_angle = float(input("Угол вектора магнитной индукции (в Градусах): "))
+b_direct = float(input("Направление вектора магнитной индукции (1 на наблюдателя, 0 от наблюдателя): "))
 e = float(input("Сила электрического поля (в Ньютонах на Метр): "))
 e_angle = float(input("Угол силы электрического поля (в Градусах): "))
 time_lim = float(input("Лимит времени симуляции (в Секундах): "))
 time_step = float(input("Шаг времени симуляции (в Миллисекундах): ")) / 1000
 
+# изменение знака вектора магнитной индукции
+if b_direct == 0:
+    b *= -1
+
 # заполнение массивов симуляции
 x = [0] * int(time_lim // time_step + 1)
 y = x
 for i in range(1, len(x)):
-    x[i] = calculate_trajectory(q, m, e, e_angle, b, b_angle, v, v_angle, time_step, x[i - 1], y[i - 1],)[0]
-    y[i] = calculate_trajectory(q, m, e, e_angle, b, b_angle, v, v_angle, time_step, x[i - 1], y[i - 1],)[1]
-    v_angle = calculate_trajectory(q, m, e, e_angle, b, b_angle, v, v_angle, time_step, x[i - 1], y[i - 1],)[2]
+    x[i], y[i], v_angle = calculate_trajectory(q, m, e, e_angle, b, v, v_angle, time_step, x[i - 1], y[i - 1],)
 
 # перевод массивов в необходимый для библиотеки тип данных
 x = np.asarray(x)
